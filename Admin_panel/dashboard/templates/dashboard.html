@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+<!-- Import Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400&display=swap" rel="stylesheet">
+
+{% block content %}
+<div class="container">
+    <!-- Heading and Paragraph -->
+    <h1 class="mb-4 text-center" style="font-family: 'Montserrat', sans-serif; font-weight: 700; color: #2C3E50;">
+        Welcome to the Admin Dashboard
+    </h1>
+    <p class="text-center" style="font-family: 'Roboto', sans-serif; font-weight: 400; color: #0f1011;">
+        Manage Users, Roles, and Permissions with ease.
+    </p>
+
+    <!-- Overview Section -->
+    <div class="d-flex justify-content-center my-5">
+        <div class="row w-100 text-center">
+            <!-- Users Overview -->
+            <div class="col-sm-12 col-md-4 mb-3">
+                <div class="card p-4 shadow-sm mx-auto" 
+                     style="max-width: 300px; background-color: #4c5d70; border-radius: 16px; border: 1px solid #E0E0E0;">
+                    <div class="badge bg-light text-dark" style="font-size: 12px; font-weight: 500;">Users</div>
+                    <h3 class="fw-bold mt-3" style="font-family: 'Arial', sans-serif; color: #ffffff;">{{ user_count }}</h3>
+                    <ul class="list-unstyled text-start mt-3" style="font-size: 14px; color: #ebf2f3;">
+                        <li><i class="bi bi-check-circle-fill text-light me-2"></i> Total Registered Users</li>
+                        <li><i class="bi bi-check-circle-fill text-light me-2"></i> Active Accounts</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Roles Overview -->
+            <div class="col-sm-12 col-md-4 mb-3">
+                <div class="card p-4 shadow-sm mx-auto" 
+                     style="max-width: 300px; background-color: #1C1C1C; border-radius: 16px; border: 1px solid #333;">
+                    <div class="badge bg-dark text-light" style="font-size: 12px; font-weight: 500;">Roles</div>
+                    <h3 class="fw-bold mt-3" style="font-family: 'Arial', sans-serif; color: #FFFFFF;">{{ role_count }}</h3>
+                    <ul class="list-unstyled text-start mt-3" style="font-size: 14px; color: #BDC3C7;">
+                        <li><i class="bi bi-check-circle-fill text-light me-2"></i> Role Assignments</li>
+                        <li><i class="bi bi-check-circle-fill text-light me-2"></i> Role Customizations</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Permissions Overview -->
+            <div class="col-sm-12 col-md-4 mb-3">
+                <div class="card p-4 shadow-sm mx-auto" 
+                     style="max-width: 300px; background-color: #212F3D; border-radius: 16px; border: 1px solid #34495E;">
+                    <div class="badge bg-primary text-light" style="font-size: 12px; font-weight: 500;">Permissions</div>
+                    <h3 class="fw-bold mt-3" style="font-family: 'Arial', sans-serif; color: #FFFFFF;">{{ permission_count }}</h3>
+                    <ul class="list-unstyled text-start mt-3" style="font-size: 14px; color: #AED6F1;">
+                        <li><i class="bi bi-check-circle-fill text-light me-2"></i> Access Rules</li>
+                        <li><i class="bi bi-check-circle-fill text-light me-2"></i> Advanced Policies</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards Section -->
+    <div class="row justify-content-center mt-5">
+        <!-- Users Card -->
+        <div class="col-sm-12 col-md-4 mb-3">
+            <div class="card shadow-sm text-center p-3" 
+                 style="background-color: #E8EAF6; border: 2px solid black; border-radius: 8px; cursor: pointer;" 
+                 onclick="location.href='{% url 'users' %}'">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="icon-box bg-white rounded-circle d-flex align-items-center justify-content-center" 
+                         style="width: 50px; height: 50px; border: 2px solid #6A1B9A;">
+                        <i class="bi bi-people" style="font-size: 24px; color: #6A1B9A;"></i>
+                    </div>
+                    <div class="ms-3 text-start">
+                        <h5 class="fw-bold mb-1" style="color: #6A1B9A;">Users</h5>
+                        <p class="text-secondary mb-2">Manage and view all users.</p>
+                        <button class="btn btn-primary btn-sm">View Users</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Roles Card -->
+        <div class="col-sm-12 col-md-4 mb-3">
+            <div class="card shadow-sm text-center p-3" 
+                 style="background-color: #FFF9C4; border: 2px solid black; border-radius: 8px; cursor: pointer;" 
+                 onclick="location.href='{% url 'roles' %}'">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="icon-box bg-white rounded-circle d-flex align-items-center justify-content-center" 
+                         style="width: 50px; height: 50px; border: 2px solid #F9A825;">
+                        <i class="bi bi-person-badge" style="font-size: 24px; color: #F9A825;"></i>
+                    </div>
+                    <div class="ms-3 text-start">
+                        <h5 class="fw-bold mb-1" style="color: #e29924;">Roles</h5>
+                        <p class="text-secondary mb-2">Manage and assign roles.</p>
+                        <button class="btn btn-primary btn-sm">View Roles</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Permissions Card -->
+        <div class="col-sm-12 col-md-4 mb-3">
+            <div class="card shadow-sm text-center p-3" 
+                 style="background-color: #E1F5FE; border: 2px solid black; border-radius: 8px; cursor: pointer;" 
+                 onclick="location.href='{% url 'permissions' %}'">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="icon-box bg-white rounded-circle d-flex align-items-center justify-content-center" 
+                         style="width: 50px; height: 50px; border: 2px solid #0288D1;">
+                        <i class="bi bi-key" style="font-size: 24px; color: #0288D1;"></i>
+                    </div>
+                    <div class="ms-3 text-start">
+                        <h5 class="fw-bold mb-1" style="color: #0288D1;">Permissions</h5>
+                        <p class="text-secondary mb-2">Configure and view permissions.</p>
+                        <button class="btn btn-primary btn-sm">View Permissions</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

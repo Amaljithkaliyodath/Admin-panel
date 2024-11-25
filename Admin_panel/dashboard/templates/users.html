@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="text-center text-md-start">Manage Users</h2>
+
+<!-- Filter and Add User Buttons -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
+    <button class="btn btn-secondary d-flex align-items-center mb-2 mb-md-0" type="button" data-bs-toggle="modal" data-bs-target="#filterModal">
+        <i class="bi bi-funnel me-2"></i> Filter
+    </button>
+    <button class="btn btn-primary d-flex align-items-center mb-2 mb-md-0" data-bs-toggle="modal" data-bs-target="#userModal">
+        <i class="bi bi-plus-circle me-2"></i> Add User
+    </button>
+</div>
+
+<!-- Sorting Modal -->
+<div class="modal fade" id="sortingModal" tabindex="-1" aria-labelledby="sortingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="get" class="modal-content">
+            {% csrf_token %}
+            <div class="modal-header">
+                <h5 class="modal-title" id="sortingModalLabel">Sort Users</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="sortField" class="form-label">Sort By</label>
+                    <select id="sortField" name="sort_field" class="form-select" required>
+                        <option value="name">Name</option>
+                        <option value="email">Email</option>
+                        <option value="role">Role</option>
+                        <option value="status">Status</option>
+                        <option value="last_login">Last Login</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="sortOrder" class="form-label">Order</label>
+                    <select id="sortOrder" name="sort_order" class="form-select" required>
+                        <option value="asc">Ascending</option>
+                        <option value="desc">Descending</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Apply Sorting</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<button class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#sortingModal">
+    <i class="bi bi-sort-alpha-down"></i> Sort Users
+</button>
+
+<!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="get" class="modal-content">
+            {% csrf_token %}
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">Filter Options</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <label for="filterName" class="form-label">Name</label>
+                        <input type="text" id="filterName" name="name" class="form-control" placeholder="Name" value="{{ filters.name|escape }}" maxlength="50" pattern="[a-zA-Z\s]*">
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label for="filterEmail" class="form-label">Email</label>
+                        <input type="email" id="filterEmail" name="email" class="form-control" placeholder="Email" value="{{ filters.email|escape }}">
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label for="filterRole" class="form-label">Role</label>
+                        <select id="filterRole" name="role" class="form-select">
+                            <option value="">-- Select Role --</option>
+                            {% for role in roles %}
+                            <option value="{{ role.id|escape }}" {% if filters.role == role.id|stringformat:"s" %}selected{% endif %}>
+                                {{ role.name|escape }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label for="filterStatus" class="form-label">Status</label>
+                        <select id="filterStatus" name="status" class="form-select">
+                            <option value="">-- Select Status --</option>
+                            <option value="1" {% if filters.status == '1' %}selected{% endif %}>Active</option>
+                            <option value="0" {% if filters.status == '0' %}selected{% endif %}>Inactive</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a href="{% url 'users' %}" class="btn btn-secondary">Clear Filters</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- User Table -->
+<div class="table-responsive">
+    <table class="table table-bordered mt-4">
+        <thead class="table-dark">
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Last Login</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.name|escape }}</td>
+                <td>{{ user.email|escape }}</td>
+                <td>{{ user.role.name|escape }}</td>
+                <td>
+                    <span class="badge {% if user.status %}bg-success{% else %}bg-danger{% endif %}">
+                        {{ user.status|yesno:"Active,Inactive" }}
+                    </span>
+                </td>
+                <td>{{ user.last_login|default:"Never"|escape }}</td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editUserModal" data-user-id="{{ user.id }}" data-user-name="{{ user.name|escape }}" data-user-email="{{ user.email|escape }}" data-user-role="{{ user.role.id }}" data-user-status="{{ user.status }}">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal" data-user-id="{{ user.id }}" data-user-name="{{ user.name|escape }}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No users found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!-- Add User Modal -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form id="addUserForm">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalLabel">Add User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="addUserError" class="alert alert-danger d-none"></div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Enter user name" required maxlength="50" pattern="[a-zA-Z\s]*">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Enter user email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Role</label>
+                        <select class="form-select" id="role" name="role" required>
+                            {% for role in roles %}
+                            <option value="{{ role.id }}">{{ role.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="status" name="status" checked>
+                        <label class="form-check-label" for="status">Active</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteUserModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete <strong id="userNameToDelete"></strong>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="" id="deleteUserForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" action="{% url 'edit_user' %}" id="editUserForm">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editUserId" name="user_id">
+                    <div class="mb-3">
+                        <label for="editName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="editName" name="name" required maxlength="50" pattern="[a-zA-Z\s]*">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editRole" class="form-label">Role</label>
+                        <select class="form-select" id="editRole" name="role" required>
+                            {% for role in roles %}
+                            <option value="{{ role.id }}">{{ role.name|escape }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="editStatus" name="status">
+                        <label class="form-check-label" for="editStatus">Active</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Handle Edit Modal
+        var editUserModal = document.getElementById('editUserModal');
+        editUserModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+
+            // Validate attributes before populating fields
+            var userId = button.getAttribute('data-user-id') || '';
+            var userName = button.getAttribute('data-user-name') || '';
+            var userEmail = button.getAttribute('data-user-email') || '';
+            var userRole = button.getAttribute('data-user-role') || '';
+            var userStatus = button.getAttribute('data-user-status') || '';
+
+            document.getElementById('editUserId').value = userId;
+            document.getElementById('editName').value = userName;
+            document.getElementById('editEmail').value = userEmail;
+            document.getElementById('editRole').value = userRole;
+            document.getElementById('editStatus').checked = userStatus === '1';
+        });
+
+        // Handle Delete Modal
+        var deleteUserModal = document.getElementById('deleteUserModal');
+        deleteUserModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+
+            // Validate attributes before populating fields
+            var userId = button.getAttribute('data-user-id');
+            var userName = button.getAttribute('data-user-name') || '';
+
+            document.getElementById('userNameToDelete').textContent = userName;
+            document.getElementById('deleteUserForm').action = "{% url 'delete_user' 0 %}".replace('0', userId);
+        });
+
+        // Retain Sorting and Filtering State
+        const urlParams = new URLSearchParams(window.location.search);
+        const sortField = urlParams.get('sort_field');
+        const sortOrder = urlParams.get('sort_order');
+
+        if (sortField) {
+            document.getElementById('sortField').value = sortField;
+        }
+        if (sortOrder) {
+            document.getElementById('sortOrder').value = sortOrder;
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+    const addUserForm = document.getElementById('addUserForm');
+    const addUserError = document.getElementById('addUserError');
+
+    addUserForm.addEventListener('submit', function (e) {
+        e.preventDefault(); // Prevent form submission
+
+        const formData = new FormData(addUserForm);
+
+        fetch("{% url 'add_user' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Close modal and reload page or update the table dynamically
+                alert(data.message);
+                location.reload();
+            } else {
+                // Show error message in the modal
+                addUserError.textContent = data.message;
+                addUserError.classList.remove('d-none');
+            }
+        })
+        .catch(error => {
+            addUserError.textContent = 'An unexpected error occurred.';
+            addUserError.classList.remove('d-none');
+        });
+    });
+});
+
+</script>
+{% endblock %}
